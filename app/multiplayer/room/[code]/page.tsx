@@ -88,6 +88,7 @@ export default function RoomPage() {
   const [chatInput, setChatInput] = useState("")
   const [personalBest, setPersonalBest] = useState(0)
   const [isNewRecord, setIsNewRecord] = useState(false)
+  const [isChatFocused, setIsChatFocused] = useState(false)
   const chatScrollRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const hasJoinedRef = useRef(false)
@@ -152,6 +153,17 @@ export default function RoomPage() {
     if (room?.status !== "playing") return
     inputRef.current?.focus()
   }, [room?.status])
+
+  useEffect(() => {
+    function handleWindowFocus() {
+      if (room?.status === "playing" && !isChatFocused) {
+        inputRef.current?.focus()
+      }
+    }
+
+    window.addEventListener("focus", handleWindowFocus)
+    return () => window.removeEventListener("focus", handleWindowFocus)
+  }, [room?.status, isChatFocused])
 
   useEffect(() => {
     if (room?.status !== "finished" || !currentUserId || results.length === 0) return
@@ -498,6 +510,13 @@ export default function RoomPage() {
                     <Input
                       value={chatInput}
                       onChange={(e) => setChatInput(e.target.value)}
+                      onFocus={() => setIsChatFocused(true)}
+                      onBlur={() => {
+                        setIsChatFocused(false)
+                        if (room.status === "playing") {
+                          setTimeout(() => inputRef.current?.focus(), 0)
+                        }
+                      }}
                       placeholder="Type a message..."
                       maxLength={200}
                       className="flex-1"
@@ -555,7 +574,11 @@ export default function RoomPage() {
         <input
           ref={inputRef}
           autoFocus
-          onBlur={() => inputRef.current?.focus()}
+          onBlur={() => {
+            if (!isChatFocused && room.status === "playing") {
+              setTimeout(() => inputRef.current?.focus(), 0)
+            }
+          }}
           onKeyDown={(e) => typingTest.handleKeyDown(e.nativeEvent)}
           className="pointer-events-none absolute left-[-9999px] top-0 h-0 w-0 opacity-0 caret-transparent"
           aria-hidden="true"

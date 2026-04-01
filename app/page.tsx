@@ -33,6 +33,16 @@ export default function TypingTestPage() {
 
   useEffect(() => {
     inputRef.current?.focus()
+
+    function handleWindowFocus() {
+      inputRef.current?.focus()
+    }
+
+    window.addEventListener("focus", handleWindowFocus)
+
+    return () => {
+      window.removeEventListener("focus", handleWindowFocus)
+    }
   }, [])
 
   return (
@@ -43,6 +53,9 @@ export default function TypingTestPage() {
       <input
         ref={inputRef}
         autoFocus
+        onBlur={() => {
+          setTimeout(() => inputRef.current?.focus(), 0)
+        }}
         onKeyDown={(e) => handleKeyDown(e.nativeEvent)}
         className="pointer-events-none absolute left-[-9999px] top-0 h-0 w-0 opacity-0 caret-transparent"
         aria-hidden="true"
