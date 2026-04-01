@@ -6,7 +6,7 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  serverExternalPackages: ["bcryptjs", "better-sqlite3"],
+  serverExternalPackages: ["bcryptjs"],
 }
 
 export default nextConfig

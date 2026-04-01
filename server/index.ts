@@ -5,6 +5,10 @@ import { validateSocketToken } from "./auth"
 import { registerHandlers } from "./socket-handlers"
 
 const httpServer = createServer()
+const corsOrigins = (process.env.SOCKET_CORS_ORIGINS || "http://localhost:3000")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean)
 
 const io = new Server<
   ClientToServerEvents,
@@ -13,7 +17,7 @@ const io = new Server<
   SocketData
 >(httpServer, {
   cors: {
-    origin: ["http://localhost:3000"],
+    origin: corsOrigins,
     credentials: true,
   },
 })
