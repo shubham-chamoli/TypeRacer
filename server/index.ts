@@ -5,14 +5,24 @@ import { validateSocketToken } from "./auth"
 import { registerHandlers } from "./socket-handlers"
 
 const httpServer = createServer((req, res) => {
-  if (req.url === "/health") {
+  const url = req.url || "/"
+
+  if (url === "/health" || url === "/healthz" || url === "/ready") {
     res.writeHead(200, { "Content-Type": "application/json" })
+    if (req.method === "HEAD") {
+      res.end()
+      return
+    }
     res.end(JSON.stringify({ ok: true }))
     return
   }
 
-  if (req.url === "/") {
+  if (url === "/") {
     res.writeHead(200, { "Content-Type": "text/plain" })
+    if (req.method === "HEAD") {
+      res.end()
+      return
+    }
     res.end("TypeRacer Socket Server")
     return
   }

@@ -44,6 +44,19 @@ import type { Difficulty } from "@/lib/words"
 
 type TimerOption = 15 | 30 | 60
 
+function WinnerCelebration({ isWinner, intense }: { isWinner: boolean; intense: boolean }) {
+  if (!isWinner) return null
+
+  return (
+    <div
+      className={`pointer-events-none fixed inset-x-0 top-0 z-40 h-1 ${
+        intense ? "bg-gradient-to-r from-amber-300 via-yellow-300 to-amber-300" : "bg-amber-300"
+      }`}
+      aria-hidden="true"
+    />
+  )
+}
+
 export default function RoomPage() {
   const params = useParams()
   const router = useRouter()
