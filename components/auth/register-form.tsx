@@ -56,8 +56,7 @@ export function RegisterForm() {
         return
       }
 
-      router.push("/multiplayer")
-      router.refresh()
+      window.location.assign("/multiplayer")
     } catch {
       setError("Something went wrong. Please try again.")
       setLoading(false)

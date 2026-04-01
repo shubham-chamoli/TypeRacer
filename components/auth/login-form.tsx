@@ -24,10 +24,9 @@ export function LoginForm() {
 
   useEffect(() => {
     if (status === "authenticated") {
-      router.replace(callbackUrl)
-      router.refresh()
+      window.location.replace(callbackUrl)
     }
-  }, [status, callbackUrl, router])
+  }, [status, callbackUrl])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -47,8 +46,7 @@ export function LoginForm() {
         return
       }
 
-      router.push(callbackUrl)
-      router.refresh()
+      window.location.assign(callbackUrl)
     } catch {
       setError("Invalid email or password")
     } finally {
