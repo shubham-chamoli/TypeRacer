@@ -206,6 +206,11 @@ export function useMultiplayerTypingTest({
             newInputs[currentWordIndex] = current.slice(0, -1)
             return newInputs
           })
+        } else if (currentWordIndex > 0) {
+          const previousWordIndex = currentWordIndex - 1
+          const previousLength = (wordInputs[previousWordIndex] || "").length
+          setCurrentWordIndex(previousWordIndex)
+          setCurrentCharIndex(previousLength)
         }
         return
       }

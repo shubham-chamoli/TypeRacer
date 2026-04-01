@@ -557,7 +557,7 @@ export default function RoomPage() {
           autoFocus
           onBlur={() => inputRef.current?.focus()}
           onKeyDown={(e) => typingTest.handleKeyDown(e.nativeEvent)}
-          className="pointer-events-none absolute opacity-0"
+          className="pointer-events-none absolute left-[-9999px] top-0 h-0 w-0 opacity-0 caret-transparent"
           aria-hidden="true"
         />
 

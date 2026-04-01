@@ -33,13 +33,6 @@ export default function TypingTestPage() {
 
   useEffect(() => {
     inputRef.current?.focus()
-    const focusInterval = window.setInterval(() => {
-      if (document.activeElement !== inputRef.current) {
-        inputRef.current?.focus()
-      }
-    }, 1200)
-
-    return () => window.clearInterval(focusInterval)
   }, [])
 
   return (
@@ -50,9 +43,8 @@ export default function TypingTestPage() {
       <input
         ref={inputRef}
         autoFocus
-        onBlur={() => inputRef.current?.focus()}
         onKeyDown={(e) => handleKeyDown(e.nativeEvent)}
-        className="pointer-events-none absolute opacity-0"
+        className="pointer-events-none absolute left-[-9999px] top-0 h-0 w-0 opacity-0 caret-transparent"
         aria-hidden="true"
       />
 
@@ -96,7 +88,6 @@ export default function TypingTestPage() {
               currentWordIndex={currentWordIndex}
               currentCharIndex={currentCharIndex}
               getWordCharStates={getWordCharStates}
-              ghostCursor={ghostCursor}
               testState={testState}
             />
 

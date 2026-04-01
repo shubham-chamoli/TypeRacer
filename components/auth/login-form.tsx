@@ -1,8 +1,10 @@
 "use client"
 
 import { useState } from "react"
+import { useEffect } from "react"
 import { useSearchParams } from "next/navigation"
 import { useRouter } from "next/navigation"
+import { useAuthSession } from "@/hooks/use-auth-session"
 import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -13,11 +15,19 @@ import { Gauge, Loader2 } from "lucide-react"
 export function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { status } = useAuthSession()
   const callbackUrl = searchParams.get("callbackUrl") || "/multiplayer"
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    if (status === "authenticated") {
+      router.replace(callbackUrl)
+      router.refresh()
+    }
+  }, [status, callbackUrl, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

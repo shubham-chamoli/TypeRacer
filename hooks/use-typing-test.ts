@@ -411,6 +411,15 @@ export function useTypingTest() {
               newInputs[currentWordIndex] = current.slice(0, -1)
               return newInputs
             })
+          } else if (currentWordIndex > 0) {
+            const previousWordIndex = currentWordIndex - 1
+            const previousLength = (wordInputs[previousWordIndex] || "").length
+            if (testState === "running") {
+              trackKeyTiming(currentWordIndex, previousWordIndex, previousLength)
+            }
+            playKeySound()
+            setCurrentWordIndex(previousWordIndex)
+            setCurrentCharIndex(previousLength)
           }
           return
         }
