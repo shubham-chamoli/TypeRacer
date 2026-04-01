@@ -15,8 +15,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: parsed.error.errors[0]?.message || "Invalid input" }, { status: 400 })
     }
 
+    const normalizedEmail = parsed.data.email.trim().toLowerCase()
+
     const user = await db.query.users.findFirst({
-      where: eq(users.email, parsed.data.email),
+      where: eq(users.email, normalizedEmail),
     })
 
     if (!user || !user.passwordHash) {

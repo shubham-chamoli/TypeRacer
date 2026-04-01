@@ -13,8 +13,10 @@ export async function registerUser(data: { name: string; email: string; password
       return { success: false as const, error: parsed.error.errors[0].message }
     }
 
+    const normalizedEmail = parsed.data.email.trim().toLowerCase()
+
     const existing = await db.query.users.findFirst({
-      where: eq(users.email, parsed.data.email),
+      where: eq(users.email, normalizedEmail),
     })
 
     if (existing) {
@@ -25,7 +27,7 @@ export async function registerUser(data: { name: string; email: string; password
 
     const [user] = await db.insert(users).values({
       name: parsed.data.name,
-      email: parsed.data.email,
+      email: normalizedEmail,
       passwordHash,
     }).returning()
 

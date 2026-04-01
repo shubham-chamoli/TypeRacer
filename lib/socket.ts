@@ -10,7 +10,6 @@ export function getSocket(token: string): TypedSocket {
     socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:3001", {
       auth: { token },
       autoConnect: false,
-      transports: ["websocket", "polling"],
     })
   }
   return socket
