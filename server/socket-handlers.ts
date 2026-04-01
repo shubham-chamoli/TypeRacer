@@ -1,23 +1,31 @@
 import { Server, Socket } from "socket.io"
 import crypto from "crypto"
-import Database from "better-sqlite3"
-import { drizzle } from "drizzle-orm/better-sqlite3"
+import { createClient } from "@libsql/client"
+import { drizzle } from "drizzle-orm/libsql"
 import { eq } from "drizzle-orm"
 import { matches, matchResults, userStats } from "../db/schema"
 import type { ClientToServerEvents, ServerToClientEvents, SocketData, GameResult, DirectMessage } from "../types/socket"
 import { roomManager } from "./room-manager"
 import { generateWords } from "../lib/words"
 import type { Difficulty } from "../lib/words"
-import path from "path"
 
 type TypedIO = Server<ClientToServerEvents, ServerToClientEvents, Record<string, never>, SocketData>
 type TypedSocket = Socket<ClientToServerEvents, ServerToClientEvents, Record<string, never>, SocketData>
 
-const dbPath = path.join(process.cwd(), "db", "dev.db")
-const sqlite = new Database(dbPath)
-sqlite.pragma("journal_mode = WAL")
-sqlite.pragma("foreign_keys = ON")
-const db = drizzle(sqlite, { schema: { matches, matchResults, userStats } })
+const dbUrl = process.env.TURSO_DATABASE_URL || process.env.DATABASE_URL
+const db = dbUrl
+  ? drizzle(
+      createClient({
+        url: dbUrl,
+        authToken: process.env.TURSO_AUTH_TOKEN,
+      }),
+      { schema: { matches, matchResults, userStats } }
+    )
+  : null
+
+if (!db) {
+  console.warn("[Socket] TURSO_DATABASE_URL missing; match persistence is disabled")
+}
 
 const onlineUsers = new Map<string, string>()
 const directMessageHistory = new Map<string, DirectMessage[]>()
@@ -357,58 +365,60 @@ async function endGame(io: TypedIO, code: string) {
 
   // Persist to database
   let matchId = ""
-  try {
-    const [match] = await db.insert(matches).values({
-      roomCode: code,
-      difficulty: room.config.difficulty,
-      timeLimit: room.config.timeLimit,
-      wordsSeed: JSON.stringify(room.gameState.words.slice(0, 50)),
-      playerCount: room.players.size,
-      startedAt: new Date(room.gameState.startTime),
-      endedAt: new Date(),
-    }).returning()
-    matchId = match.id
+  if (db) {
+    try {
+      const [match] = await db.insert(matches).values({
+        roomCode: code,
+        difficulty: room.config.difficulty,
+        timeLimit: room.config.timeLimit,
+        wordsSeed: JSON.stringify(room.gameState.words.slice(0, 50)),
+        playerCount: room.players.size,
+        startedAt: new Date(room.gameState.startTime),
+        endedAt: new Date(),
+      }).returning()
+      matchId = match.id
 
-    for (const result of results) {
-      await db.insert(matchResults).values({
-        matchId: match.id,
-        userId: result.playerId,
-        wpm: result.wpm,
-        rawWpm: result.rawWpm,
-        accuracy: result.accuracy,
-        placement: result.placement,
-      })
-
-      // Update user stats
-      const existing = await db.query.userStats.findFirst({
-        where: eq(userStats.userId, result.playerId),
-      })
-
-      if (existing) {
-        const newTotalGames = existing.totalGames + 1
-        const newAverageWpm =
-          (existing.averageWpm * existing.totalGames + result.wpm) / newTotalGames
-
-        await db.update(userStats)
-          .set({
-            totalGames: newTotalGames,
-            bestWpm: Math.max(existing.bestWpm, result.wpm),
-            averageWpm: Math.round(newAverageWpm * 10) / 10,
-            totalWins: result.placement === 1 ? existing.totalWins + 1 : existing.totalWins,
-          })
-          .where(eq(userStats.userId, result.playerId))
-      } else {
-        await db.insert(userStats).values({
+      for (const result of results) {
+        await db.insert(matchResults).values({
+          matchId: match.id,
           userId: result.playerId,
-          totalGames: 1,
-          bestWpm: result.wpm,
-          averageWpm: result.wpm,
-          totalWins: result.placement === 1 ? 1 : 0,
+          wpm: result.wpm,
+          rawWpm: result.rawWpm,
+          accuracy: result.accuracy,
+          placement: result.placement,
         })
+
+        // Update user stats
+        const existing = await db.query.userStats.findFirst({
+          where: eq(userStats.userId, result.playerId),
+        })
+
+        if (existing) {
+          const newTotalGames = existing.totalGames + 1
+          const newAverageWpm =
+            (existing.averageWpm * existing.totalGames + result.wpm) / newTotalGames
+
+          await db.update(userStats)
+            .set({
+              totalGames: newTotalGames,
+              bestWpm: Math.max(existing.bestWpm, result.wpm),
+              averageWpm: Math.round(newAverageWpm * 10) / 10,
+              totalWins: result.placement === 1 ? existing.totalWins + 1 : existing.totalWins,
+            })
+            .where(eq(userStats.userId, result.playerId))
+        } else {
+          await db.insert(userStats).values({
+            userId: result.playerId,
+            totalGames: 1,
+            bestWpm: result.wpm,
+            averageWpm: result.wpm,
+            totalWins: result.placement === 1 ? 1 : 0,
+          })
+        }
       }
+    } catch (err) {
+      console.error("[Game] Failed to persist match results:", err)
     }
-  } catch (err) {
-    console.error("[Game] Failed to persist match results:", err)
   }
 
   io.to(code).emit("game:end", { results, matchId })

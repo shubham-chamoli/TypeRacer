@@ -4,7 +4,22 @@ import type { ClientToServerEvents, ServerToClientEvents, SocketData } from "../
 import { validateSocketToken } from "./auth"
 import { registerHandlers } from "./socket-handlers"
 
-const httpServer = createServer()
+const httpServer = createServer((req, res) => {
+  if (req.url === "/health") {
+    res.writeHead(200, { "Content-Type": "application/json" })
+    res.end(JSON.stringify({ ok: true }))
+    return
+  }
+
+  if (req.url === "/") {
+    res.writeHead(200, { "Content-Type": "text/plain" })
+    res.end("TypeRacer Socket Server")
+    return
+  }
+
+  res.writeHead(404, { "Content-Type": "application/json" })
+  res.end(JSON.stringify({ error: "Not found" }))
+})
 const corsOrigins = (process.env.SOCKET_CORS_ORIGINS || "http://localhost:3000")
   .split(",")
   .map((origin) => origin.trim())
