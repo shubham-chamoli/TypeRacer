@@ -2,11 +2,11 @@
 
 import { useEffect, useCallback, useRef, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
-import { useSession } from "next-auth/react"
 import Link from "next/link"
 import { useSocket } from "@/hooks/use-socket"
 import { useRoom } from "@/hooks/use-room"
 import { useMultiplayerTypingTest } from "@/hooks/use-multiplayer-typing-test"
+import { useAuthSession } from "@/hooks/use-auth-session"
 import { TypingDisplay } from "@/components/typing-display"
 import { InviteFriendDialog } from "@/components/multiplayer/invite-friend-dialog"
 import { Button } from "@/components/ui/button"
@@ -48,7 +48,7 @@ export default function RoomPage() {
   const params = useParams()
   const router = useRouter()
   const code = (params.code as string)?.toUpperCase()
-  const { data: session, status: sessionStatus } = useSession()
+  const { data: session, status: sessionStatus } = useAuthSession()
   const { socket, isConnected, isConnecting, error: socketError } = useSocket()
   const {
     room,

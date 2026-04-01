@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { useSession, signOut } from "next-auth/react"
 import { Gauge, Menu, User, LogOut, Gamepad2, Keyboard, Trophy } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -23,6 +22,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet"
 import { useSocket } from "@/hooks/use-socket"
+import { useAuthSession } from "@/hooks/use-auth-session"
 import { toast } from "sonner"
 
 const navLinks = [
@@ -31,13 +31,20 @@ const navLinks = [
 ]
 
 export function Navbar() {
-  const { data: session } = useSession()
+  const { data: session, refresh } = useAuthSession()
   const pathname = usePathname()
   const router = useRouter()
   const [sheetOpen, setSheetOpen] = useState(false)
   const { socket, isConnected } = useSocket()
 
   const user = session?.user
+
+  async function handleSignOut() {
+    await fetch("/api/auth/logout", { method: "POST" })
+    await refresh()
+    router.push("/")
+    router.refresh()
+  }
 
   // Listen for room invitations
   useEffect(() => {
@@ -123,7 +130,7 @@ export function Navbar() {
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
-                      onClick={() => signOut({ redirectTo: "/" })}
+                      onClick={handleSignOut}
                       className="flex items-center gap-2 text-destructive focus:text-destructive"
                     >
                       <LogOut size={14} />
@@ -187,7 +194,7 @@ export function Navbar() {
                     <button
                       onClick={() => {
                         setSheetOpen(false)
-                        signOut({ redirectTo: "/" })
+                        handleSignOut()
                       }}
                       className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-destructive hover:bg-destructive/10"
                     >

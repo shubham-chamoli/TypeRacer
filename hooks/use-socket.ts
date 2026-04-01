@@ -1,8 +1,8 @@
 "use client"
 
 import { useState, useEffect, useRef, useCallback } from "react"
-import { useSession } from "next-auth/react"
-import { getSocket, disconnectSocket } from "@/lib/socket"
+import { getSocket } from "@/lib/socket"
+import { useAuthSession } from "@/hooks/use-auth-session"
 import type { ClientToServerEvents, ServerToClientEvents } from "@/types/socket"
 import type { Socket } from "socket.io-client"
 
@@ -16,7 +16,7 @@ interface UseSocketReturn {
 }
 
 export function useSocket(): UseSocketReturn {
-  const { data: session, status } = useSession()
+  const { data: session, status } = useAuthSession()
   const [isConnected, setIsConnected] = useState(false)
   const [isConnecting, setIsConnecting] = useState(false)
   const [error, setError] = useState<string | null>(null)

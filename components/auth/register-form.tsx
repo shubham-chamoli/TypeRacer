@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { signIn } from "next-auth/react"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -11,6 +11,7 @@ import { registerUser } from "@/actions/auth"
 import { Gauge, Loader2 } from "lucide-react"
 
 export function RegisterForm() {
+  const router = useRouter()
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -41,11 +42,22 @@ export function RegisterForm() {
         setLoading(false)
         return
       }
-      await signIn("credentials", {
-        email,
-        password,
-        redirectTo: "/multiplayer",
+
+      const signInResult = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
       })
+
+      if (!signInResult.ok) {
+        const payload = await signInResult.json().catch(() => null)
+        setError(payload?.error || "Account created, but sign-in failed")
+        setLoading(false)
+        return
+      }
+
+      router.push("/multiplayer")
+      router.refresh()
     } catch {
       setError("Something went wrong. Please try again.")
       setLoading(false)

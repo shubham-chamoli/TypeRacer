@@ -1,9 +1,9 @@
 "use client"
 
 import { useCallback, useEffect, useMemo, useState } from "react"
-import { useSession } from "next-auth/react"
 import { getFriends } from "@/actions/friends"
 import { useSocket } from "@/hooks/use-socket"
+import { useAuthSession } from "@/hooks/use-auth-session"
 import type { DirectMessage } from "@/types/socket"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -19,7 +19,7 @@ interface UserInfo {
 }
 
 export default function FriendsPage() {
-  const { data: session } = useSession()
+  const { data: session } = useAuthSession()
   const currentUserId = session?.user?.id
   const { socket, isConnected } = useSocket()
 

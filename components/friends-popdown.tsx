@@ -11,7 +11,7 @@ import {
 } from "@/actions/friends"
 import type { ClientToServerEvents, DirectMessage, ServerToClientEvents } from "@/types/socket"
 import type { Socket } from "socket.io-client"
-import { useSession } from "next-auth/react"
+import { useAuthSession } from "@/hooks/use-auth-session"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -66,7 +66,7 @@ interface FriendsPopdownProps {
 
 export function FriendsPopdown({ socket, isConnected }: FriendsPopdownProps) {
   const router = useRouter()
-  const { data: session } = useSession()
+  const { data: session } = useAuthSession()
 
   const [open, setOpen] = useState(false)
   const [activeTab, setActiveTab] = useState<"friends" | "requests" | "find">("friends")

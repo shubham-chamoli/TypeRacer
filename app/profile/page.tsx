@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useSession } from "next-auth/react"
+import { useAuthSession } from "@/hooks/use-auth-session"
 import { getUserStats, getMatchHistory, getUserProfile } from "@/actions/stats"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -30,7 +30,7 @@ interface MatchHistoryItem {
 }
 
 export default function ProfilePage() {
-  const { data: session } = useSession()
+  const { data: session } = useAuthSession()
   const [stats, setStats] = useState<Stats | null>(null)
   const [history, setHistory] = useState<MatchHistoryItem[]>([])
   const [page, setPage] = useState(1)

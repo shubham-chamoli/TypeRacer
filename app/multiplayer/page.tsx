@@ -2,10 +2,10 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { useSession } from "next-auth/react"
 import Link from "next/link"
 import { useSocket } from "@/hooks/use-socket"
 import { useRoom } from "@/hooks/use-room"
+import { useAuthSession } from "@/hooks/use-auth-session"
 import type { RoomConfig } from "@/types/socket"
 import type { Difficulty } from "@/lib/words"
 import { Button } from "@/components/ui/button"
@@ -27,7 +27,7 @@ type TimerOption = 15 | 30 | 60
 
 export default function MultiplayerLobbyPage() {
   const router = useRouter()
-  const { data: session, status: sessionStatus } = useSession()
+  const { data: session, status: sessionStatus } = useAuthSession()
   const { socket, isConnected, isConnecting, error: socketError } = useSocket()
   const { createRoom, joinRoom, error: roomError, isLoading } = useRoom(socket, isConnected)
 

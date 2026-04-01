@@ -1,47 +1,16 @@
-import { decode } from "@auth/core/jwt"
-import fs from "fs"
-import path from "path"
+import { jwtVerify } from "jose"
 
-function readEnvSecret() {
-  const fromProcess = process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET
-  if (fromProcess) return fromProcess
-
-  try {
-    const envPath = path.join(process.cwd(), ".env")
-    if (!fs.existsSync(envPath)) return ""
-    const envRaw = fs.readFileSync(envPath, "utf8")
-    const match = envRaw.match(/^(NEXTAUTH_SECRET|AUTH_SECRET)\s*=\s*"?([^"\r\n]+)"?/m)
-    return match?.[2] ?? ""
-  } catch {
-    return ""
+function getSecretKey(): Uint8Array {
+  const secret = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET
+  if (!secret) {
+    throw new Error("Missing AUTH_SECRET (or NEXTAUTH_SECRET) environment variable")
   }
-}
-
-const secret = readEnvSecret()
-
-async function decodeSessionToken(token: string) {
-  if (!secret) return null
-
-  // Auth.js cookie salt differs by version and secure-cookie usage.
-  const salts = [
-    "authjs.session-token",
-    "__Secure-authjs.session-token",
-    "next-auth.session-token",
-    "__Secure-next-auth.session-token",
-  ]
-
-  for (const salt of salts) {
-    const payload = await decode({ token, secret, salt })
-    if (payload) return payload
-  }
-
-  return null
+  return new TextEncoder().encode(secret)
 }
 
 export async function validateSocketToken(token: string) {
   try {
-    const payload = await decodeSessionToken(token)
-    if (!payload) return null
+    const { payload } = await jwtVerify(token, getSecretKey())
 
     const userId = (payload.sub || (payload.id as string | undefined)) ?? null
     if (!userId) return null
@@ -49,7 +18,7 @@ export async function validateSocketToken(token: string) {
     return {
       userId,
       userName: typeof payload.name === "string" ? payload.name : "Anonymous",
-      userImage: typeof payload.picture === "string" ? payload.picture : null,
+      userImage: typeof payload.image === "string" ? payload.image : null,
     }
   } catch (error) {
     console.error("[Auth] Token validation error:", error)
