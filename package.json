@@ -6,6 +6,7 @@
     "dev": "concurrently -n next,socket -c cyan,magenta \"next dev\" \"tsx watch server/index.ts\"",
     "dev:next": "next dev",
     "dev:socket": "tsx watch server/index.ts",
+    "start:socket": "tsx server/index.ts",
     "build": "next build",
     "start": "concurrently \"next start\" \"tsx server/index.ts\"",
     "lint": "eslint .",
