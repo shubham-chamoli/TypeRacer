@@ -123,7 +123,6 @@ export default function TypingTestPage() {
       <footer className="mx-auto w-full max-w-5xl px-6 pb-6">
         <div className="flex items-center justify-between border-t border-border pt-4 text-xs text-muted-foreground">
           <span>TypeRacer</span>
-          <span>Built with Next.js and Socket.io</span>
         </div>
       </footer>
     </div>

@@ -308,7 +308,6 @@ export default function MultiplayerLobbyPage() {
       <footer className="mx-auto w-full max-w-5xl px-6 pb-6">
         <div className="flex items-center justify-between border-t border-border pt-4 text-xs text-muted-foreground">
           <span>TypeRacer</span>
-          <span>UI by Shubham Chamoli</span>
         </div>
       </footer>
     </div>

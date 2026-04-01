@@ -26,7 +26,7 @@ export function TypingDisplay({
 
     let line: number[] = []
     let lineLength = 0
-    const maxLineLength = 62
+    const maxLineLength = 52
 
     for (let i = 0; i < words.length; i++) {
       const wordLength = words[i].length + 1
@@ -69,7 +69,7 @@ export function TypingDisplay({
           {lineLayout.lines.map((lineWordIndices, lineIndex) => (
             <div
               key={`line-${lineIndex}`}
-              className="flex h-14 items-center gap-3 pr-4"
+              className="flex min-h-14 flex-wrap items-center gap-3 pr-4"
             >
               {lineWordIndices.map((wordIndex) => {
                 const isActive = wordIndex === currentWordIndex
