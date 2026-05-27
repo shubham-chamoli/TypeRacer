@@ -70,7 +70,7 @@ io.on("connection", (socket) => {
   registerHandlers(io, socket)
 })
 
-const PORT = parseInt(process.env.PORT || process.env.SOCKET_PORT || "3001", 10)
+const PORT = parseInt(process.env.PORT || process.env.SOCKET_PORT || "8080", 10)
 
 httpServer.listen(PORT, () => {
   console.log(`[Socket.IO] Server running on port ${PORT}`)
